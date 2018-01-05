@@ -10,7 +10,30 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171215031954) do
+ActiveRecord::Schema.define(version: 20180104161514) do
+
+  create_table "books", force: :cascade do |t|
+    t.string "title"
+    t.string "isbn"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "favos", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "book_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["book_id"], name: "index_favos_on_book_id"
+    t.index ["user_id"], name: "index_favos_on_user_id"
+  end
+
+  create_table "favs", force: :cascade do |t|
+    t.string "isbn"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "users", force: :cascade do |t|
     t.string "name"
@@ -18,6 +41,8 @@ ActiveRecord::Schema.define(version: 20171215031954) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "password_digest"
+    t.string "pref"
+    t.string "city"
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 

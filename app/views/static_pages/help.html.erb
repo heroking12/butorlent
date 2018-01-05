@@ -1,9 +1,51 @@
-<% provide(:title, "Help") %>
-    <h1>Help</h1>
-    <p>  Get help on the Ruby on Rails Tutorial at the
-      <a href="https://railstutorial.jp/help">Rails Tutorial help
-      section</a>.
-      To get help on this sample app, see the
-      <a href="https://railstutorial.jp/#ebook">
-      <em>Ruby on Rails Tutorial</em> book</a>.
-    </p>
+<% provide(:title, "検索") %>
+<%= form_tag('/help', method: :get) do %>　
+    <%= text_field_tag :book, "",  id: "book_search", name: "keyword", placeholder: "キーワードを打ち込んでください", style: "width: 200px;"%><button title="検索" type="submit">検索</button>
+<% end %>
+<% if logged_in? %>
+ <h3><%= @test.pref %> <%= @test.city %>の図書館</h3>
+ <% @hash['Libraries']['Library'].each do |library| %>
+  <% @systemid = library['systemid'] %>
+  <% end %>
+ <% else %>
+ <h3>ログインしてください<h3>
+      <% @systemid = 'Tokyo_NDL' %>
+<% end %>
+
+<h2>検索結果</h2>
+
+
+ <% @books.each do |book| %>
+   <% uri = URI.parse('http://api.calil.jp/check?appkey={1f797b9d960207280336610120edb44a}&isbn='+"#{book['isbn']}"+'&systemid='+"#{@systemid}"+'&callback=') %>
+   <% json = Net::HTTP.get(uri) %>
+   <% json = json.slice(1..-3) %>
+   <% result = JSON.parse(json) %>
+   <% uri = URI.parse('http://api.calil.jp/check?session='+"#{result["session"]}"+'&callback=') %>
+   <% json = Net::HTTP.get(uri) %>
+   <% json = json.slice(1..-3) %>
+   <% result = JSON.parse(json) %>
+    <div class="list">
+      <table>
+      <tr>
+      <th><%= link_to (image_tag(book['mediumImageUrl'])) %></th>
+      <th>
+        <ul>
+        <li><%= "#{book.title}"%></li>
+        <li><%= link_to "#{book['itemPrice']}"+"円(楽天)","#{book['itemUrl']}"%></li>
+      </ul>
+      <% if result['books']["#{book['isbn']}"]["#{@systemid}"]["libkey"].nil? %>
+      <samll>ページを更新してください</small>
+      <% else %>
+      <% result['books']["#{book['isbn']}"]["#{@systemid}"]["libkey"].each do |a| %>
+      <% if a=="" %>
+      <li>図書館にありません</li>
+      <% else %>
+      <li><%= link_to "#{a}","#{result['books']["#{book['isbn']}"]["#{@systemid}"]["reserveurl"]}" %></li>
+      <% end %>
+      <% end %>
+      <% end %>
+
+
+    </table>
+    </div>
+ <% end %>

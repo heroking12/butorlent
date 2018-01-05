@@ -1,7 +1,13 @@
 class UsersController < ApplicationController
 
   def show
+    require 'uri'
+    require 'open-uri'
+    require 'kconv'
+    require 'active_support/core_ext/hash/conversions'
     @user = User.find(params[:id])
+
+    #@favorites = Favorite.where("user_id = ?", @user)
   end
 
   def new
@@ -18,12 +24,18 @@ class UsersController < ApplicationController
     else
       render 'new'
     end
+
+
+  end
+
+  def edit
+    @user = User.find(params[:id])
   end
 
   private
 
    def user_params
      params.require(:user).permit(:name, :email, :password,
-     :password_confirmation)
+     :password_confirmation,:pref,:city)
    end
 end
