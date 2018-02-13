@@ -15,7 +15,5 @@ class User < ApplicationRecord
     BCrypt::Password.create(string, cost: cost)
   end
 
-  #お気に入り
-  has_many :favorites
-  has_many :books, through: :favorites
+  has_many :fav, dependent: :destroy
 end
