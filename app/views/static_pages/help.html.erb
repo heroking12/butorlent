@@ -4,47 +4,30 @@
 <% end %>
 <% if logged_in? %>
  <h3><%= @test.pref %> <%= @test.city %>の図書館</h3>
- <% @hash['Libraries']['Library'].each do |library| %>
-  <% @systemid = library['systemid'] %>
-  <% end %>
  <% else %>
  <h3>ログインしてください<h3>
-      <% @systemid = 'Tokyo_NDL' %>
 <% end %>
-
 <h2>検索結果</h2>
 
 
- <% @books.each do |book| %>
-   <% uri = URI.parse('http://api.calil.jp/check?appkey={1f797b9d960207280336610120edb44a}&isbn='+"#{book['isbn']}"+'&systemid='+"#{@systemid}"+'&callback=') %>
-   <% json = Net::HTTP.get(uri) %>
-   <% json = json.slice(1..-3) %>
-   <% result = JSON.parse(json) %>
-   <% uri = URI.parse('http://api.calil.jp/check?session='+"#{result["session"]}"+'&callback=') %>
-   <% json = Net::HTTP.get(uri) %>
-   <% json = json.slice(1..-3) %>
-   <% result = JSON.parse(json) %>
+ <% @items.each do |book| %>
     <div class="list">
       <table>
       <tr>
-      <th><%= link_to (image_tag(book['mediumImageUrl'])) %></th>
+      <th> <%= image_tag(book["img"]) %> </th>
       <th>
         <ul>
-        <li><%= "#{book.title}"%></li>
-        <li><%= link_to "#{book['itemPrice']}"+"円(楽天)","#{book['itemUrl']}"%></li>
-      </ul>
-      <% if result['books']["#{book['isbn']}"]["#{@systemid}"]["libkey"].nil? %>
-      <samll>ページを更新してください</small>
+        <li><%= "#{book["title"]}"%></li>
+        <li><%= link_to "#{book['price']}"+"円(楽天)","#{book['Pref']}"%></li>
+      <li>
+      <% if book["libkey"].nil? %>
       <% else %>
-      <% result['books']["#{book['isbn']}"]["#{@systemid}"]["libkey"].each do |a| %>
-      <% if a=="" %>
-      <li>図書館にありません</li>
-      <% else %>
-      <li><%= link_to "#{a}","#{result['books']["#{book['isbn']}"]["#{@systemid}"]["reserveurl"]}" %></li>
+      <% book["libkey"].keys.each do |status| %>
+      <%= status %>:<%= link_to "#{book["libkey"]["#{status}"]}","#{book["reserve"]}" %>
       <% end %>
       <% end %>
-      <% end %>
-
+      </li>
+    </ul>
 
     </table>
     </div>

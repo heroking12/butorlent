@@ -31,8 +31,16 @@ class StaticPagesController < ApplicationController
    url  = URI.encode('http://api.calil.jp/library?limit=10'+"&pref=#{@test.pref}"+"&city=#{@test.city}")
    xml  = open( url ).read.toutf8
    @hash = Hash.from_xml(xml)
+   @hash['Libraries']['Library'].each do |a|
+   @systemid=a['systemid']
+   end
+ else
+   @systemid = "Tokyo_NDL"
  end
+
+ @items=[]
 @books.each do |book|
+  @data = {}
   uri = URI.parse('http://api.calil.jp/check?appkey={1f797b9d960207280336610120edb44a}&isbn='+"#{book['isbn']}"+'&systemid='+"#{@systemid}"+'&callback=')
   json = Net::HTTP.get(uri)
   json = json.slice(1..-3)
@@ -41,7 +49,17 @@ class StaticPagesController < ApplicationController
   json = Net::HTTP.get(uri)
   json = json.slice(1..-3)
   result = JSON.parse(json)
+  @data["title"]="#{book.title}"
+  @data["isbn"]="#{book['isbn']}"
+  @data["price"]="#{book['itemPrice']}"
+  @data["Pref"]="#{book['itemUrl']}"
+  @data["libkey"]=result['books']["#{book['isbn']}"]["#{@systemid}"]["libkey"]
+  @data["place"]=[]
+  @data["reserve"]=result['books']["#{book['isbn']}"]["#{@systemid}"]["reserveurl"]
+  @data["img"]=book['mediumImageUrl']
+  @items.push(@data)
 end
+
 
 end
 
@@ -78,6 +96,7 @@ end
     json = Net::HTTP.get(uri)
     json = json.slice(1..-3)
     result = JSON.parse(json)
+
 
 
 
